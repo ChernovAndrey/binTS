@@ -292,7 +292,7 @@ class BinConv(nn.Module):
         if self.last_layer == 'conv':
             out = self.conv_layer(x, self.layers[layer_id]["conv_ffn"], None, self.kernel_size_ffn, False).squeeze(1)
         else:
-            out = self.layers[layer_id]["conv_ffn"](x)
+            out = self.layers[layer_id]["conv_ffn"]
         if self.is_cum_sum:
             assert False, "Do not use it, it degrades the performance"
             out = torch.flip(torch.cumsum(torch.flip(out, dims=[1]), dim=1), dims=[1])
@@ -405,6 +405,7 @@ class LightningBinConv(BinConv, pl.LightningModule):
     def __init__(self, lr, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.lr = lr
+
     def training_step(self, batch, batch_idx):
         inputs, targets = batch
 
@@ -424,5 +425,5 @@ class LightningBinConv(BinConv, pl.LightningModule):
         return loss
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
+        optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
         return optimizer
